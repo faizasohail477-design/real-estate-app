@@ -1,13 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Admin Login | Shuqran</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <link rel="stylesheet" href="css/admin.css">
+  <meta charset="UTF-8"> 
+  <title>Admin Login | Shuqran</title> 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+  <link rel="stylesheet" href="css/admin.css"> 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-
   <script src="../config.js"></script>
 </head>
 
@@ -20,9 +18,9 @@
   <form id="adminLoginForm">
     <input type="text" id="username" placeholder="Username" required>
 
-    <div style="position:relative;">
-      <input type="password" id="password" placeholder="Password" required>
-      <i class="fa fa-eye" id="togglePassword"></i>
+    <div style="position: relative; margin-bottom: 15px;">
+      <input type="password" id="password" placeholder="Password" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
+      <i class="fa-solid fa-eye" id="togglePassword" style="position: absolute; right: 12px; top: 35%; transform: translateY(-50%); cursor: pointer; color: #232222;"></i>
     </div>
 
     <button type="submit">Login</button>
