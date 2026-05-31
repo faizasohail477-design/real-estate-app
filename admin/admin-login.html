@@ -63,16 +63,19 @@ document.getElementById("adminLoginForm").addEventListener("submit", async (e) =
   }
 });
 
- // Toggle password visibility
-  function makeToggle(toggleId, inputId) {
-    document.getElementById(toggleId).addEventListener('click', function() {
-      const input = document.getElementById(inputId);
-      const type = input.type === 'password' ? 'text' : 'password';
-      input.type = type;
-      this.classList.toggle('fa-eye');
-      this.classList.toggle('fa-eye-slash');
-    });
+ document.getElementById('togglePassword').addEventListener('click', function () {
+  const input = document.getElementById('password');
+
+  if (input.type === "password") {
+    input.type = "text";
+    this.classList.remove("fa-eye");
+    this.classList.add("fa-eye-slash");
+  } else {
+    input.type = "password";
+    this.classList.remove("fa-eye-slash");
+    this.classList.add("fa-eye");
   }
+});
 </script>
 
 </body>
