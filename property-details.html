@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Property Details | Shuqran Real Estate</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        .details-wrapper { max-width: 1200px; margin: 40px auto; padding: 0 20px; display: grid; grid-template-columns: 2fr 1fr; gap: 30px; }
+       
+        .slider-box { position: relative; background: #000; border-radius: 15px; height: 500px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+        .slider-box img { max-width: 100%; max-height: 100%; object-fit: contain; transition: 0.5s; }
+        .arrow { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(201, 162, 77, 0.8); color: #fff; padding: 15px; cursor: pointer; border: none; font-size: 20px; border-radius: 5px; z-index: 10; transition: 0.3s; }
+        .arrow:hover { background: #C9A24D; }
+        .arrow-left { left: 10px; } .arrow-right { right: 10px; }
+
+        .dots-container { position: absolute; bottom: 15px; left: 0; right: 0; display: flex; justify-content: center; gap: 10px; z-index: 10; pointer-events: none; }
+        .dot { width: 12px; height: 12px; background: rgba(255,255,255,0.4); border-radius: 50%; cursor: pointer; pointer-events: auto; transition: 0.3s; }
+        .dot.active { background: #fff; transform: scale(1.3); }
+
+        .property-info-card { background: #fff; padding: 30px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); margin-top: 20px; }
+        .spec-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; background: #f9f9f9; padding: 20px; border-radius: 10px; }
+      
+        .map-container { margin-top: 30px; border-radius: 12px; overflow: hidden; height: 350px; border: 1px solid #eee; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .map-container iframe { width: 100%; height: 100%; border: 0; }
+
+        .side-contact { position: sticky; top: 20px; background: #fff; padding: 25px; border-radius: 15px; border-top: 5px solid #C9A24D; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+    
+        .direct-msg-form { margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee; }
+        .direct-msg-form input, .direct-msg-form textarea { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 5px; font-family: inherit; }
+        .btn-msg { background: #040a3b; color: white; border: none; width: 100%; padding: 12px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .btn-msg:hover { background: #333; }
+
+        @media (max-width: 768px) {
+            .details-wrapper { grid-template-columns: 1fr !important; }
+            .side-contact { position: static; }
+            .slider-box { height: 300px; }
+            .dots-container { bottom: 10px; }
+        }
+    </style>
+</head>
+<body>
+    <header><nav class="navbar"><img src="images/logo.png">
+         <div>
+            <a href="index.html">Home</a>
+            <a href="properties.html">Properties</a>
+            <a href="construction.html">Construction</a>
+            <a href="upcoming.html">Upcoming Projects</a>
+            <a href="contact.html">Contact</a>
+        </div>
+    </nav></header>
+
+    <div class="details-wrapper">
+        <div class="main-side">
+            <!-- Image Slider with Dots -->
+            <div class="slider-box">
+                <button class="arrow arrow-left" onclick="changeSlide(-1)"><i class="fas fa-chevron-left"></i></button>
+                <img id="main-display-img" src="">
+       
+                <div id="dots-container" class="dots-container"></div>
+                <button class="arrow arrow-right" onclick="changeSlide(1)"><i class="fas fa-chevron-right"></i></button>
+            </div>
+
+            <div class="property-info-card">
+                <h1 id="detTitle"></h1>
+                <p id="detLoc" style="color:#666;"></p>
+                <div class="spec-grid" id="detSpecs"></div>
+                
+                <h3>Description</h3>
+                <p id="detDesc" style="line-height:1.8; color:#444;"></p>
+
+                <div class="map-container">
+                    <iframe id="googleMap" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                </div>
+            </div>
+        </div>
+
+        <div class="side-side">
+            <div class="side-contact">
+                <h2 id="detPrice" style="color:#C9A24D; margin-bottom: 20px;"></h2>
+                
+                <div id="cta-buttons"></div>
+
+                <div class="direct-msg-form">
+                    <h4>Interested? Send a Message</h4>
+                    <form id="propInquiryForm">
+                        <input type="text" id="user_name" placeholder="Your Name" required>
+                        <input type="email" id="user_email" placeholder="Your Email" required>
+                        <textarea id="user_msg" rows="4" placeholder="Your Message..." required></textarea>
+                        <button type="submit" class="btn-msg"><i class="fas fa-paper-plane"></i> Send</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const pid = urlParams.get('id');
+    let imgList = []; let currentIdx = 0;
+    let propertyTitle = "";
+
+    async function loadDetails() {
+        try {
+            const res = await fetch(API_BASE + '/api/properties/all');
+            const data = await res.json();
+            const p = data.find(item => item.property_id == pid);
+            
+            if(p) {
+                propertyTitle = p.title;
+                document.getElementById('detTitle').innerText = p.title;
+                document.getElementById('detLoc').innerHTML = `<i class="fas fa-map-marker-alt"></i> ${p.location}`;
+                document.getElementById('detPrice').innerText = `PKR ${p.price.toLocaleString()}`;
+                document.getElementById('detDesc').innerText = p.description;
+                
+                imgList = p.images ? p.images.split(',') : ['images/placeholder.jpg'];
+              
+                updateSlider();
+                generateDots();
+
+                document.getElementById('detSpecs').innerHTML = `
+                    <div><strong>Type:</strong> ${p.property_type}</div>
+                    <div><strong>Area:</strong> ${p.area_sqft} sqft</div>
+                    <div><strong>Bedrooms:</strong> ${p.rooms || 0}</div>
+                    <div><strong>Bathrooms:</strong> ${p.bathrooms || 0}</div>
+                `;
+              
+                const currentUrl = window.location.href; 
+                const messageTemplate = `Hi, I am interested in your ${p.area_sqft} Sqft ${p.property_type} of PKR ${p.price.toLocaleString()} for sale in ${p.location}.\n\nLink: ${currentUrl}`;
+                const encodedMsg = encodeURIComponent(messageTemplate);
+
+                // Update CTA Buttons
+                document.getElementById('cta-buttons').innerHTML = `
+                    <a href="https://wa.me/923442412896?text=${encodedMsg}" 
+                       target="_blank" 
+                       class="btn-primary full" 
+                       style="background:#25D366; display:block; text-align:center; margin-bottom:10px; text-decoration:none; padding: 12px; border-radius: 8px; color: white; font-weight: bold;">
+                        <i class="fab fa-whatsapp"></i> WhatsApp Inquiry
+                    </a>
+                    <a href="https://mail.google.com/mail/?view=cm&fs=1&to=zaman.shedai@gmail.com&su=Property Inquiry: ${propertyTitle}&body=${encodedMsg}" 
+                        target="_blank" 
+                        class="btn-primary full" 
+                        style="background: white; color: #444; border: 1px solid #ddd; display:block; text-align:center; text-decoration:none; font-weight: 500; padding: 12px; border-radius: 8px;">
+                        <i class="fas fa-envelope" style="color: #EA4335; margin-right: 8px;"></i> 
+                        Gmail Inquiry
+                    </a>
+                `;
+
+                document.getElementById('user_msg').value = messageTemplate;
+
+                const locationQuery = encodeURIComponent(p.location);
+                document.getElementById('googleMap').src = `https://maps.google.com/maps?q=${locationQuery}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
+
+            }
+        } catch (err) {
+            console.error("Error loading details:", err);
+        }
+    }
+
+    function generateDots() {
+        const container = document.getElementById('dots-container');
+        container.innerHTML = '';
+        
+        if(imgList.length === 0) return;
+
+        imgList.forEach((_, idx) => {
+            const dot = document.createElement('div');
+            dot.className = `dot ${idx === 0 ? 'active' : ''}`;
+            dot.onclick = () => { 
+                currentIdx = idx; 
+                updateSlider(); 
+            };
+            container.appendChild(dot);
+        });
+    }
+
+    function updateSlider() {
+        const baseUrl = API_BASE + '/uploads/';
+        const currentImg = imgList[currentIdx] ? imgList[currentIdx].trim() : 'placeholder.jpg';
+        document.getElementById('main-display-img').src = currentImg.includes('images/') ? currentImg : baseUrl + currentImg;
+
+        const dots = document.querySelectorAll('.dot');
+        dots.forEach((dot, idx) => {
+            if(idx === currentIdx) dot.classList.add('active');
+            else dot.classList.remove('active');
+        });
+    }
+
+    function changeSlide(dir) {
+        currentIdx = (currentIdx + dir + imgList.length) % imgList.length;
+        updateSlider();
+    }
+
+    document.getElementById('propInquiryForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = e.target.querySelector('button');
+        btn.innerText = "Sending...";
+        btn.disabled = true;
+
+        const inquiryData = {
+            name: document.getElementById('user_name').value,
+            email: document.getElementById('user_email').value,
+            
+            message: `[Property ID: ${pid}]\n\n${document.getElementById('user_msg').value}`
+        };
+
+        try {
+            const response = await fetch(API_BASE + '/api/inquiries/messages/add', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(inquiryData)
+            });
+            const res = await response.json();
+            if(res.success) {
+                alert("✅ Success: Inquiry recorded! Admin will receive your link.");
+                document.getElementById('propInquiryForm').reset();
+            }
+        } catch (err) {
+            alert("❌ Connection Error.");
+        } finally {
+            btn.innerText = "Send to Admin";
+            btn.disabled = false;
+        }
+    });
+
+    window.onload = loadDetails;
+</script>
+<script src="config.js"></script>
+</body>
+</html>

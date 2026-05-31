@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Contact Us | Shuqran Real Estate</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/style.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root { --gold: #C9A24D; --dark: #1a1a1a; }
+    .contact-container { max-width: 1200px; margin: auto; padding: 50px 20px; }
+    .renovated-split { display: grid; grid-template-columns: 1fr 1fr; gap: 50px; align-items: start; }
+    
+    .info-side h2 { font-size: 2.5rem; color: var(--dark); margin-bottom: 20px; border-left: 5px solid var(--gold); padding-left: 15px; }
+    .contact-link { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; text-decoration: none; color: #444; font-size: 1.1rem; transition: 0.3s; }
+    .contact-link:hover { color: var(--gold); transform: translateX(5px); }
+    .contact-link i { color: var(--gold); font-size: 1.5rem; width: 30px; }
+
+    .social-box { margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; }
+    .social-icons-contact { display: flex; gap: 15px; }
+    .social-icons-contact a { width: 45px; height: 45px; background: #f4f4f4; display: flex; align-items: center; justify-content: center; border-radius: 50%; color: var(--dark); transition: 0.3s; font-size: 1.2rem; }
+    .social-icons-contact a:hover { background: var(--gold); color: #fff; transform: translateY(-5px); }
+
+    .about-shuqran { margin-top: 60px; background: #fdfbf7; padding: 40px; border-radius: 15px; border: 1px solid #f1e6d2; line-height: 1.8; color: #555; }
+    .about-shuqran h3 { color: var(--dark); margin-bottom: 15px; font-size: 1.8rem; }
+    .vip-tag { display: inline-block; background: var(--gold); color: white; padding: 5px 15px; border-radius: 50px; font-size: 0.8rem; margin-bottom: 10px; font-weight: bold; }
+
+    .form-box { background: #fff; padding: 40px; border-radius: 15px; box-shadow: 0 15px 40px rgba(0,0,0,0.08); border-top: 5px solid var(--gold); }
+    .form-box h3 { margin-bottom: 10px; font-size: 1.8rem; }
+    .form-box select, .form-box input, .form-box textarea { width: 100%; padding: 12px 15px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; outline: none; transition: 0.3s; font-family: inherit; font-size: 1rem; }
+    .form-box select:focus, .form-box input:focus, .form-box textarea:focus { border-color: var(--gold); box-shadow: 0 0 10px rgba(201,162,77,0.1); }
+    
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+
+    @media (max-width: 768px) { 
+      .renovated-split { grid-template-columns: 1fr; } 
+      .form-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <nav class="navbar">
+    <img src="images/logo.png" alt="Shuqran Logo">
+    <div>
+      <a href="index.html">Home</a>
+      <a href="properties.html">Properties</a>
+      <a href="construction.html">Construction</a>
+      <a href="upcoming.html">Upcoming Projects</a>
+      <a href="contact.html" class="active">Contact</a>
+    </div>
+  </nav>
+</header>
+
+<div class="contact-container">
+  <div class="renovated-split">
+    <div class="info-side">
+      <span class="vip-tag">ESTABLISHED 2015</span>
+      <h2>Let's Talk Business</h2>
+      <p style="margin-bottom: 30px; font-size: 1.1rem; color: #666;">Our reputation is built on your trust. Get in touch for premium real estate services in DHA City and Bahria Town Karachi.</p>
+
+      <a href="tel:+923442412896" class="contact-link"><i class="fas fa-phone-alt"></i> +92 344 2412896</a>
+      <a href="https://mail.google.com/mail/?view=cm&fs=1&to=zaman.shedai@gmail.com" target="_blank" class="contact-link"><i class="fas fa-envelope"></i> zaman.shedai@gmail.com</a>
+      <a href="https://goo.gl/maps/xyz" target="_blank" class="contact-link"><i class="fas fa-map-marker-alt"></i> Plot 38, Jakvani Heights C5, Sector 3 DHA City, Karachi</a>
+
+      <div class="social-box">
+        <h4>Follow Our Updates</h4>
+        <div class="social-icons-contact">
+          <a href="#"><i class="fab fa-facebook-f"></i></a>
+          <a href="#"><i class="fab fa-instagram"></i></a>
+          <a href="https://wa.me/923442412896" target="_blank" style="background: #25D366; color: white;"><i class="fab fa-whatsapp"></i></a>
+        </div>
+      </div>
+    </div>
+
+    <form class="form-box" id="contactForm">
+      <h3>Quick Inquiry</h3>
+      <p style="margin-bottom: 20px; font-size: 0.9rem; color: #888;">Provide your details and our team will contact you shortly.</p>
+      
+      <div class="form-row">
+        <input type="text" id="c_name" placeholder="Full Name" required>
+        <input type="tel" id="c_phone" placeholder="Phone Number (e.g. 03xx-xxxxxxx)" required>
+      </div>
+
+      <input type="email" id="c_email" placeholder="Email Address" required>
+      
+      <select id="c_subject" required>
+        <option value="" disabled selected>Select Inquiry Type</option>
+        <option value="Buying">Buying Property</option>
+        <option value="Selling">Selling Property</option>
+        <option value="Construction">Construction Services</option>
+        <option value="Investment">Investment Advice</option>
+        <option value="Other">Other</option>
+      </select>
+
+      <input type="text" id="c_address" placeholder="Your Current Location / City (Optional)">
+
+      <textarea id="c_msg" rows="4" placeholder="How can we help you? Write your message here..." required></textarea>
+      
+      <button type="submit" class="btn-primary full">Confirm & Send Message</button>
+    </form>
+  </div>
+
+  <div class="about-shuqran">
+    <h3>About Shuqran Real Estate & Construction</h3>
+    <p>
+      Shuqran Real Estate & Construction stands as a beacon of trust and excellence in the heart of <strong>DHA City Karachi</strong> and <strong>Bahria Town Karachi</strong>. Since our establishment in <strong>2015</strong>, we have dedicated ourselves to transforming the dreams of our clients into concrete reality.
+    </p>
+    <p>
+     Our team possesses a deep understanding of market trends and the intricacies of legal documentation, ensuring your investment remains secure at all times. Whether you are looking to purchase a plot or planning to construct your dream home in DHA City, Shuqran Real Estate is your comprehensive partner. With over 10 years of excellence and thousands of satisfied clients, our track record is a testament to our success.
+    </p>
+  </div>
+</div>
+
+<script>
+  document.getElementById('contactForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const submitBtn = e.target.querySelector('button');
+    submitBtn.innerText = "Sending...";
+    submitBtn.disabled = true;
+
+    const formData = {
+      name: document.getElementById('c_name').value,
+      phone: document.getElementById('c_phone').value,
+      email: document.getElementById('c_email').value,
+      subject: document.getElementById('c_subject').value,
+      address: document.getElementById('c_address').value,
+      message: document.getElementById('c_msg').value
+    };
+
+    try {
+      const response = await fetch(API_BASE + '/api/inquiries/messages/add', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+      const res = await response.json();
+      if(res.success) {
+        alert("✅ Message Sent Successfully! Shuqran Team will contact you soon.");
+        document.getElementById('contactForm').reset();
+      } else {
+        alert("❌ Error: " + res.message);
+      }
+    } catch (err) { 
+        alert("❌ Error: Server connection failed. Make sure your backend is running."); 
+    } finally {
+      submitBtn.innerText = "Confirm & Send Message";
+      submitBtn.disabled = false;
+    }
+  });
+</script>
+
+<footer class="footer">© 2026 Shuqran Real Estate & Construction. All rights reserved.</footer>
+<script src="config.js"></script>
+</body>
+</html>

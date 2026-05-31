@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Construction Services | Shuqran Real Estate</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+<header>
+  <nav class="navbar">
+    <img src="images/logo.png" alt="Shuqran Logo">
+    <div>
+      <a href="index.html">Home</a>
+      <a href="properties.html">Properties</a>
+      <a href="construction.html" class="active">Construction</a>
+      <a href="upcoming.html">Upcoming Projects</a>
+      <a href="contact.html">Contact</a>
+    </div>
+  </nav>
+</header>
+
+<section class="section page-header">
+  <h1>Construction Services</h1>
+  <p>From planning to completion — build your dream home with confidence</p>
+</section>
+
+<section class="section split">
+  <div>
+    <h2>Why Choose Our Construction Services?</h2>
+    <ul class="highlights">
+      <li>Turnkey construction solutions</li>
+      <li>Transparent costing & timelines</li>
+      <li>Experienced engineers & architects</li>
+      <li>DHA approved construction standards</li>
+    </ul>
+  </div>
+
+  <form class="form-box" id="constForm">
+    <h3>Request Construction</h3>
+    <input type="text" id="fullName" placeholder="Full Name" required>
+    <input type="tel" id="phone" placeholder="Phone Number" required>
+    <input type="text" id="plotLoc" placeholder="Plot Location" required>
+    
+    <select id="projType" required onchange="toggleOtherBox()">
+      <option value="">Select Project Type</option>
+      <option value="Residential House">New Residential House</option>
+      <option value="Villa">Luxury Villa Construction</option>
+      <option value="Commercial Building">Commercial Building</option>
+      <option value="Home Renovation">Home Renovation</option>
+      <option value="Interior Design">Interior Design</option>
+      <option value="Paint Work">Full Home Paint</option>
+      <option value="Outside Wall/Boundary">Outside Wall/Boundary</option>
+      <option value="home planground ground sections">Home Planning & Ground Sections</option>
+      <option value="Other">Other (Please Specify)</option>
+    </select>
+
+    <input type="text" id="otherType" placeholder="Specify your project type here" style="display:none; margin-top:10px;">
+
+    <textarea id="details" rows="4" placeholder="Share more details (e.g. number of floors, specific materials, or your vision)"></textarea>
+    
+    <button type="submit" class="btn-primary full">Submit Request</button>
+  </form>
+</section>
+<script>
+// Logic to show/hide the 'Other' input box
+function toggleOtherBox() {
+    const select = document.getElementById('projType');
+    const otherBox = document.getElementById('otherType');
+    otherBox.style.display = (select.value === 'Other') ? 'block' : 'none';
+}
+
+document.getElementById('constForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    // Check if 'Other' is selected to use the custom text
+    let finalType = document.getElementById('projType').value;
+    if(finalType === 'Other') {
+        finalType = "Other: " + document.getElementById('otherType').value;
+    }
+
+    const formData = {
+        name: document.getElementById('fullName').value,
+        phone: document.getElementById('phone').value,
+        location: document.getElementById('plotLoc').value,
+        type: finalType,
+        details: document.getElementById('details').value
+    };
+
+    try {
+        const response = await fetch(API_BASE + '/api/inquiries/construction/add', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(formData)
+        });
+        const res = await response.json();
+        if(res.success) {
+            alert("✅ Request Sent Successfully! Shuqran Team will contact you soon.");
+            document.getElementById('constForm').reset();
+            document.getElementById('otherType').style.display = 'none';
+        } else {
+            alert("❌ Server Error: " + res.error);
+        }
+    } catch (err) { 
+        console.error(err);
+        alert("❌ Connection Failed! Make sure server is running."); 
+    }
+});
+</script>
+
+<footer>
+  &copy; 2026 Shuqran Real Estate. All rights reserved.
+</footer>
+<script src="config.js"></script>
+</body>
+</html>

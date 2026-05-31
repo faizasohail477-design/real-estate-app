@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Construction Requests | Admin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/admin.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    .details-col { max-width: 300px; font-size: 0.85em; color: #444; line-height: 1.4; }
+    .type-badge { background: #f0f4f8; padding: 4px 8px; border-radius: 4px; font-weight: 600; font-size: 0.8em; }
+    .btn-delete { background: #ff4d4d; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8em; }
+    .btn-delete:hover { background: #cc0000; }
+    .time-col { font-size: 0.85em; color: #555; white-space: nowrap; }
+    .status-btn { border: none; padding: 5px 10px; border-radius: 20px; font-size: 0.75em; cursor: pointer; font-weight: bold; }
+    .status-pending { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+    .status-seen { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+  </style>
+</head>
+<body class="admin-body">
+
+<div class="admin-wrapper">
+  <aside class="admin-sidebar">
+    <div class="sidebar-header"><img src="../images/logo.png" alt="Logo" class="admin-logo"><h2>Shuqran Admin</h2></div>
+    <ul>
+      <li><a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+      <li><a href="properties.html"><i class="fas fa-building"></i> Properties</a></li>
+      <li><a href="add-property.html"><i class="fas fa-plus-square"></i> Add Property</a></li>
+      <li><a href="upcoming-projects.html"><i class="fas fa-project-diagram"></i> Upcoming Projects</a></li>
+      <li><a href="add-upcoming-projects.html"><i class="fas fa-plus-circle"></i> Add Upcoming Project</a></li>
+      <li><a href="construction-requests.html" class="active"><i class="fas fa-tools"></i> Construction Requests</a></li>
+      <li><a href="messages.html"><i class="fas fa-envelope"></i> Messages</a></li>
+      <li><a href="change-credentials.html"><i class="fas fa-key"></i> Change Credentials</a></li>
+      <li><a href="#" onclick="performLogout()"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+    </ul>
+  </aside>
+
+  <div class="admin-main">
+    <header class="admin-topbar"><h1>Construction Requests</h1></header>
+    <section class="admin-section">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Date & Time</th>
+            <th>Name & Contact</th>
+            <th>Plot Location</th>
+            <th>Project Type</th>
+            <th style="width:25%;">Requirements</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="constructionBody"></tbody>
+      </table>
+    </section>
+  </div>
+</div>
+
+<script src="../config.js"></script>
+<script>
+  async function fetchConstruction() {
+    try {
+      const response = await fetch(API_BASE + '/api/inquiries/construction');
+      const data = await response.json();
+      const tbody = document.getElementById('constructionBody');
+      tbody.innerHTML = '';
+
+      if (data.length > 0) {
+        data.forEach(r => {
+          const dateStr = new Date(r.submitted_at).toLocaleString('en-GB');
+          const isSeen = r.status === 'Seen';
+          const statusHtml = `
+            <button class="status-btn ${isSeen ? 'status-seen' : 'status-pending'}"
+                    onclick="toggleStatus(${r.request_id}, '${r.status}')">
+              ${isSeen ? '<i class="fas fa-check-circle"></i> Seen' : '<i class="fas fa-clock"></i> Pending'}
+            </button>`;
+
+          tbody.innerHTML += `
+            <tr>
+              <td class="time-col">${dateStr}</td>
+              <td>
+                <div style="font-weight:bold;">${r.client_name}</div>
+                <div style="font-size:0.85em; color:#666;"><i class="fas fa-phone"></i> ${r.phone_no || '—'}</div>
+              </td>
+              <td>${r.plot_location}</td>
+              <td><span class="type-badge">${r.plot_size}</span></td>
+              <td class="details-col">${r.requirements || '<span style="color:#bbb;">No details</span>'}</td>
+              <td>${statusHtml}</td>
+              <td>
+                <button class="btn-delete" onclick="deleteRequest(${r.request_id})">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </td>
+            </tr>`;
+        });
+      } else {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px;">No requests found yet.</td></tr>';
+      }
+    } catch (err) {
+      document.getElementById('constructionBody').innerHTML = '<tr><td colspan="7" style="color:red; text-align:center;">Connection Error!</td></tr>';
+    }
+  }
+
+  async function toggleStatus(id, currentStatus) {
+    const newStatus = currentStatus === 'Seen' ? 'Pending' : 'Seen';
+    try {
+      await fetch(`${API_BASE}/api/inquiries/construction/status/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus })
+      });
+      fetchConstruction();
+    } catch (err) { alert("Status update failed!"); }
+  }
+
+  async function deleteRequest(id) {
+    if (confirm("Delete this request?")) {
+      await fetch(`${API_BASE}/api/inquiries/construction/${id}`, { method: 'DELETE' });
+      fetchConstruction();
+    }
+  }
+
+  function performLogout() {
+    if (confirm("Logout karna chahte ho?")) {
+      localStorage.removeItem('adminToken');
+      localStorage.removeItem('adminUser');
+      window.location.href = 'admin-login.html';
+    }
+  }
+
+  window.onload = fetchConstruction;
+</script>
+</body>
+</html>

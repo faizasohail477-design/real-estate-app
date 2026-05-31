@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Edit Property | Admin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/admin.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+ 
+    .image-grid { display: flex; gap: 15px; flex-wrap: wrap; margin-top: 15px; }
+    .img-wrapper { position: relative; width: 100px; height: 100px; }
+    .img-wrapper img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; border: 2px solid #ddd; }
+    
+    .remove-btn {
+        position: absolute; top: -8px; right: -8px; background: #ff4d4d; color: white;
+        border-radius: 50%; width: 22px; height: 22px; text-align: center; line-height: 20px;
+        cursor: pointer; font-size: 14px; font-weight: bold; border: 2px solid white;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center;
+    }
+    .remove-btn:hover { background: #cc0000; transform: scale(1.1); }
+    .admin-btn:disabled { background-color: #ccc; cursor: not-allowed; }
+    
+   
+    #other_type_input {
+        display: none; 
+        width: 100%;
+        padding: 10px; 
+        box-sizing: border-box; 
+        border: 1px solid #ccc; 
+        border-radius: 4px;
+        margin-top: 5px;
+    }
+  </style>
+</head>
+<body class="admin-body">
+
+<div class="admin-wrapper">
+  <aside class="admin-sidebar">
+    <div class="sidebar-header"><img src="../images/logo.png" alt="Logo" class="admin-logo"><h2>Shuqran Admin</h2></div>
+    <ul>
+      <li><a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+      <li><a href="properties.html"><i class="fas fa-building"></i> Properties</a></li>
+      <li><a href="add-property.html"><i class="fas fa-plus-square"></i> Add Property</a></li>
+      <li><a href="upcoming-projects.html"><i class="fas fa-project-diagram"></i> Upcoming Projects</a></li>
+      <li><a href="add-upcoming-projects.html"><i class="fas fa-plus-circle"></i> Add Upcoming Project</a></li>
+      <li><a href="construction-requests.html"><i class="fas fa-tools"></i> Construction Requests</a></li>
+      <li><a href="messages.html"><i class="fas fa-envelope"></i> Messages</a></li>
+      
+    </ul>
+  </aside>
+
+  <div class="admin-main">
+    <header class="admin-topbar"><h1>Edit Property Details</h1></header>
+
+    <section class="admin-section">
+      <form class="admin-form" id="editForm">
+        <label>Property Title</label>
+        <input type="text" id="title" required>
+
+        <label>Price</label>
+        <input type="number" id="price" required>
+
+        <label>Location</label>
+        <input type="text" id="location" required>
+
+        <!-- UPDATED: Property Type Dropdown with "Other" Logic -->
+        <label>Property Type</label>
+        <select id="property_type" name="property_type" onchange="toggleOtherInput(this)">
+          <option value="Apartment">Apartment / Flat</option>
+          <option value="Villa">Villa / House</option>
+          <option value="Plot">Plot / Land</option>
+          <option value="Office">Office</option>
+          <option value="Shop">Shop / Showroom</option>
+          <option value="Farmhouse">Farmhouse</option>
+          <option value="Other">Other</option>
+        </select>
+        <!-- Hidden Input for "Other" -->
+        <input type="text" id="other_type_input" placeholder="Please specify type">
+
+        <label>Status</label>
+        <select id="status">
+          <option value="Available">Available</option>
+          <option value="Sold">Sold</option>
+          <option value="Upcoming">Upcoming</option>
+        </select>
+
+        <label>Bedrooms</label><input type="number" id="rooms">
+        <label>Bathrooms</label><input type="number" id="bathrooms">
+        <label>Area (sqft)</label><input type="number" id="area">
+
+        <hr>
+        <h3 style="color: #f39c12; margin-bottom: 10px;">Internal Owner Details</h3>
+        <input type="text" id="owner_name" placeholder="Owner Name">
+        <input type="text" id="owner_contact" placeholder="Owner Contact">
+        <input type="number" id="owner_price" placeholder="Owner Price">
+        
+        <label>Description</label>
+        <textarea id="description" rows="4"></textarea>
+
+        <label style="margin-top: 20px; display: block;">Current Images (Click X to Delete)</label>
+        <div id="existing_images_container" class="image-grid"></div>
+
+        <label style="margin-top: 20px; display: block;">Upload More Images (Max 5 Total)</label>
+        <input type="file" id="new_images" accept="image/*" multiple onchange="handleNewFiles(this)">
+        <div id="new_preview_container" class="image-grid"></div>
+
+        <button type="submit" id="submitBtn" class="admin-btn" style="margin-top: 30px;">Update Property</button>
+        <a href="properties.html" style="display:block; text-align:center; margin-top:10px; color:#666;">Cancel</a>
+      </form>
+    </section>
+  </div>
+</div>
+
+<script>
+const urlParams = new URLSearchParams(window.location.search);
+const propertyId = urlParams.get('id');
+let deletedImages = [];
+let newSelectedFiles = [];
+
+// UPDATED: Function to handle "Other" input visibility
+function toggleOtherInput(selectElement) {
+    const otherInput = document.getElementById('other_type_input');
+    if (selectElement.value === 'Other') {
+        otherInput.style.display = 'block';
+        otherInput.required = true;
+    } else {
+        otherInput.style.display = 'none';
+        otherInput.required = false;
+        otherInput.value = '';
+    }
+}
+
+async function loadData() {
+    try {
+        const res = await fetch(`${API_BASE}/api/properties/all`);
+        const all = await res.json();
+        const p = all.find(item => item.property_id == propertyId);
+
+        if (p) {
+            document.getElementById('title').value = p.title;
+            document.getElementById('price').value = p.price;
+            document.getElementById('location').value = p.location;
+            document.getElementById('status').value = p.status;
+            document.getElementById('rooms').value = p.rooms;
+            document.getElementById('bathrooms').value = p.bathrooms;
+            document.getElementById('area').value = p.area_sqft;
+            document.getElementById('owner_name').value = p.owner_name;
+            document.getElementById('owner_contact').value = p.owner_contact;
+            document.getElementById('owner_price').value = p.owner_price;
+            document.getElementById('description').value = p.description;
+
+            // UPDATED: Handle "Other" Type Logic on Load
+            const standardTypes = ["Apartment", "Villa", "Plot", "Office", "Shop", "Farmhouse"];
+            const typeSelect = document.getElementById('property_type');
+            
+            if (standardTypes.includes(p.property_type)) {
+                typeSelect.value = p.property_type;
+                toggleOtherInput({ value: p.property_type });
+            } else {
+                // Agar type "Other" hai ya koi custom hai
+                typeSelect.value = "Other";
+                document.getElementById('other_type_input').value = p.property_type;
+                toggleOtherInput({ value: "Other" });
+            }
+
+            // Render Existing Images
+            const container = document.getElementById('existing_images_container');
+            if(p.images) {
+                const imgList = p.images.split(',');
+                imgList.forEach((imgName, idx) => {
+                    const div = document.createElement('div');
+                    div.className = 'img-wrapper';
+                    div.id = `existing-img-${idx}`;
+                    div.innerHTML = `
+                        <img src="${API_BASE}/uploads/${imgName}">
+                        <span class="remove-btn" onclick="markDelete('${imgName}', 'existing-img-${idx}')">&times;</span>`;
+                    container.appendChild(div);
+                });
+            }
+        }
+    } catch (err) { console.error(err); }
+}
+
+function markDelete(imgName, divId) {
+    if(confirm("Bhai, yeh pic delete karni hai?")) {
+        deletedImages.push(imgName);
+        document.getElementById(divId).remove();
+    }
+}
+
+function handleNewFiles(input) {
+    const files = Array.from(input.files);
+    newSelectedFiles = [...newSelectedFiles, ...files];
+    input.value = ""; 
+    renderNewPreviews();
+}
+
+function renderNewPreviews() {
+    const container = document.getElementById('new_preview_container');
+    container.innerHTML = '';
+    newSelectedFiles.forEach((file, index) => {
+        const reader = new FileReader();
+        reader.onload = e => {
+            const div = document.createElement('div');
+            div.className = 'img-wrapper';
+            div.innerHTML = `
+                <img src="${e.target.result}">
+                <span class="remove-btn" onclick="removeNewPhoto(${index})">&times;</span>`;
+            container.appendChild(div);
+        }
+        reader.readAsDataURL(file);
+    });
+}
+
+function removeNewPhoto(index) {
+    newSelectedFiles.splice(index, 1);
+    renderNewPreviews();
+}
+
+document.getElementById('editForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.innerText = "Updating...";
+
+    // UPDATED: Handle Property Type on Submit
+    const typeSelect = document.getElementById('property_type');
+    let finalPropertyType = typeSelect.value;
+    if (typeSelect.value === 'Other') {
+        finalPropertyType = document.getElementById('other_type_input').value;
+    }
+
+    const formData = new FormData();
+    formData.append('title', document.getElementById('title').value);
+    formData.append('price', document.getElementById('price').value);
+    formData.append('location', document.getElementById('location').value);
+    formData.append('property_type', finalPropertyType); // Send correct type
+    formData.append('status', document.getElementById('status').value);
+    formData.append('rooms', document.getElementById('rooms').value);
+    formData.append('bathrooms', document.getElementById('bathrooms').value);
+    formData.append('area_sqft', document.getElementById('area').value);
+    formData.append('owner_name', document.getElementById('owner_name').value);
+    formData.append('owner_contact', document.getElementById('owner_contact').value);
+    formData.append('owner_price', document.getElementById('owner_price').value);
+    formData.append('description', document.getElementById('description').value);
+    
+    formData.append('deletedImages', JSON.stringify(deletedImages));
+    newSelectedFiles.forEach(file => formData.append('images', file));
+
+    try {
+        const response = await fetch(`${API_BASE}/api/properties/update/${propertyId}`, {
+            method: 'PUT',
+            body: formData
+        });
+        const res = await response.json();
+        if(res.success) {
+            alert("✅ Property Updated Successfully!");
+            window.location.href = 'properties.html';
+        }
+    } catch (err) {
+        alert("❌ Error connecting to server");
+        btn.disabled = false;
+        btn.innerText = "Update Property";
+    }
+});
+
+window.onload = loadData;
+</script>
+<script src="../config.js"></script>
+</body>
+</html>

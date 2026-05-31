@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Shuqran Real Estate | DHA City Karachi & Bahria Town</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+<header>
+  <nav class="navbar">
+    <img src="images/logo.png" alt="Shuqran Real Estate">
+    <div>
+      <a href="index.html">Home</a>
+      <a href="properties.html">Properties</a>
+      <a href="construction.html">Construction</a>
+      <a href="upcoming.html">Upcoming Projects</a>
+      <a href="contact.html">Contact</a>
+    </div>
+  </nav>
+</header>
+
+<section class="hero">
+  <h1 class="hero-title">Premium Properties in DHA City & Bahria Town Karachi</h1>
+  <p class="hero-subtitle">Trusted real estate & construction services for modern living</p>
+  <div class="hero-buttons">
+    <a href="properties.html" class="btn-primary">Browse Properties</a>
+    <a href="construction.html" class="btn-primary outline">Request Construction</a>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-header">
+    <div>
+      <h2>Available Properties in DHA City & Bahria Town Karachi</h2>
+      <p>Explore our recently added premium listings</p>
+    </div>
+    <a href="properties.html" class="btn-primary">View All Properties</a>
+  </div>
+
+  <div class="property-grid" id="recentProps">
+    <p style="grid-column: 1/-1; text-align: center; padding: 50px;">Loading latest properties...</p>
+  </div>
+</section>
+
+<section class="section light why-choose">
+  <div class="container">
+    <h2 class="center">Why Choose Shuqran Real Estate?</h2>
+    <p class="center subtitle">Your trusted partner for premium properties and construction services</p>
+    <div class="info-grid">
+      <div class="info-card"><i class="fas fa-shield-alt"></i><h3>Verified Properties</h3><p>Documentation is thoroughly checked.</p></div>
+      <div class="info-card"><i class="fas fa-headset"></i><h3>Expert Guidance</h3><p>Deep DHA City & Bahria Town market knowledge.</p></div>
+      <div class="info-card"><i class="fas fa-handshake"></i><h3>Trusted Service</h3><p>Excellence in real estate & construction.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="cta">
+  <div class="cta-box">
+    <div class="cta-text">
+      <h2>Ready to Find Your Dream Property?</h2>
+      <p>Connect with our experts and discover the perfect property in DHA City & Bahria Town Karachi.</p>
+      <div class="cta-buttons">
+        <a href="properties.html" class="btn-primary">Browse Properties</a>
+        <a href="contact.html" class="btn-primary outline">Contact Us</a>
+      </div>
+    </div>
+    <div class="cta-image"><img src="images/cta-image.jpeg" alt="Consultation"></div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="footer-grid">
+    <div class="footer-col">
+      <img src="images/logo.png" class="footer-logo">
+      <p>Your Trusted Partner in DHA City and Bahria Town Karachi</p>
+      
+    </div>
+
+    <div class="footer-col">
+      <h4>Quick Links</h4>
+      <a href="index.html">Home</a>
+      <a href="properties.html">Properties</a>
+      <a href="construction.html">Construction Requests</a>
+      <a href="upcoming.html">Upcoming Projects</a>
+      <a href="contact.html">Contact</a>
+    </div>
+
+    <div class="footer-col">
+      <h4>Get in Touch</h4>
+      <p><a href="tel:+923442412896"><i class="fas fa-phone"></i> +92 344 2412896</a></p>
+      <p><a href="https://mail.google.com/mail/?view=cm&fs=1&to=zaman.shedai@gmail.com" target="_blank" style="color: inherit; text-decoration: none;"><i class="fas fa-envelope"></i> zaman.shedai@gmail.com</a></p>
+      <p><a href="https://www.google.com/maps/search/?api=1&query=Plot+38+Jakvani+Heights+C5+Commercial+Sector+3+DHA+City+Karachi" target="_blank" style="color: inherit; text-decoration: none;"><i class="fas fa-map-marker-alt"></i> Plot 38, Jakvani Heights C5, Sector 3 DHA City, Karachi</a></p>
+      
+      <a href="https://wa.me/923442412896" class="whatsapp-btn"><i class="fab fa-whatsapp"></i> WhatsApp</a>
+    </div>
+
+    <div class="footer-col">
+      <h4>Stay Updated</h4>
+      <form class="newsletter"><input type="email" placeholder="Your email"><button type="submit">→</button></form>
+    </div>
+  </div>
+  <div class="footer-bottom">© 2026 Shuqran Real Estate & Construction.</div>
+</footer>
+
+<script>
+async function fetchRecentProperties() {
+    try {
+        const response = await fetch(API_BASE + '/api/properties/all');
+        const data = await response.json();
+        const container = document.getElementById('recentProps');
+        container.innerHTML = '';
+
+        // Home page par sirf 3 latest properties
+        const recentItems = data.slice(0, 3);
+
+        recentItems.forEach(p => {
+            const imgs = p.images ? p.images.split(',') : [];
+            // Agar image nahi hai toh placeholder
+            const thumb = imgs.length > 0 ? `${API_BASE}/uploads/${imgs[0]}` : 'images/placeholder.jpg';
+            
+            // Price formatting
+            const price = p.price >= 10000000 ? (p.price/10000000).toFixed(2) + " Crore" : (p.price/100000).toFixed(2) + " Lakh";
+
+            container.innerHTML += `
+            <div class="property-card" onclick="window.location.href='property-details.html?id=${p.property_id}'">
+                <span class="badge">${p.status}</span>
+                <!-- REMOVED INLINE STYLE, CSS ab control karega -->
+                <img src="${thumb}" alt="${p.title}">
+                <div>
+                    <h3>PKR ${price}</h3>
+                    <p class="property-title">${p.title}</p>
+                    <p class="location"><i class="fas fa-map-marker-alt"></i> ${p.location}</p>
+                </div>
+            </div>`;
+        });
+    } catch (err) {
+        console.error("Fetch Error:", err);
+        document.getElementById('recentProps').innerHTML = '<p>Unable to load properties.</p>';
+    }
+}
+window.onload = fetchRecentProperties;
+</script>
+<script src="config.js"></script>
+</body>
+</html>

@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Add Property | Admin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/admin.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    
+    #preview_container {
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+        margin-top: 15px;
+    }
+
+    .preview-wrapper {
+        position: relative;
+        display: inline-block;
+        width: 100px;
+        height: 100px;
+    }
+
+    .preview-wrapper img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 2px solid #ddd;
+    }
+
+    /* Professional Cross Button (Same as Upcoming Projects) */
+    .remove-btn {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        background: #ff4d4d;
+        color: white;
+        border-radius: 50%;
+        width: 22px;
+        height: 22px;
+        text-align: center;
+        line-height: 20px; /* Center icon vertically */
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: bold;
+        border: 2px solid white;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: 0.3s;
+    }
+
+    .remove-btn:hover {
+        background: #cc0000;
+        transform: scale(1.1);
+    }
+    .admin-btn:disabled { background-color: #ccc; cursor: not-allowed; }
+      /* Other Property Type Input Styling */
+#other_type_input {
+    display: none; /* Default hidden */
+    width: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+  </style>
+</head>
+<body class="admin-body">
+
+<div class="admin-wrapper">
+  <aside class="admin-sidebar">
+    <div class="sidebar-header">
+      <img src="../images/logo.png" alt="Logo" class="admin-logo">
+      <h2>Shuqran Admin</h2>
+    </div>
+    <ul>
+      <li><a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+      <li><a href="properties.html"><i class="fas fa-building"></i> Properties</a></li>
+      <li><a href="add-property.html" class="active"><i class="fas fa-plus-square"></i> Add Property</a></li>
+      <li><a href="upcoming-projects.html"><i class="fas fa-project-diagram"></i> Upcoming Projects</a></li>
+      <li><a href="add-upcoming-projects.html"><i class="fas fa-plus-circle"></i> Add Upcoming Project</a></li>
+      <li><a href="construction-requests.html"><i class="fas fa-tools"></i> Construction Requests</a></li>
+      <li><a href="messages.html"><i class="fas fa-envelope"></i> Messages</a></li>
+      
+    </ul>
+  </aside>
+
+  <div class="admin-main">
+    <header class="admin-topbar">
+      <h1>Add New Property</h1>
+    </header>
+
+    <section class="admin-section">
+      <form class="admin-form" id="propertyForm">
+        <label>Property Title</label>
+        <input type="text" id="title" placeholder="e.g. Luxury Villa" required>
+
+        <label>Price</label>
+        <input type="number" id="price" required>
+
+        <label>Location</label>
+        <input type="text" id="location" required>
+
+        <label>Property Type</label>
+<select id="property_type" name="property_type" required onchange="toggleOtherInput(this)">
+  <!-- Default Placeholder -->
+  <option value="" disabled selected>-- Select Type --</option>
+  
+  <!-- Residential (Basic) -->
+  <option value="Apartment">Apartment / Flat</option>
+  <option value="Villa">Villa / House</option>
+  <option value="Plot">Plot / Land</option>
+  
+  <!-- Commercial (Basic) -->
+  <option value="Office">Office</option>
+  <option value="Shop">Shop / Showroom</option>
+  
+  <!-- Others -->
+  <option value="Farmhouse">Farmhouse</option>
+  <option value="Other">Other</option>
+</select>
+
+<!-- Hidden Input for "Other" -->
+<input type="text" id="other_type_input" name="other_type_input" placeholder="Please specify" style="display: none; margin-top: 5px;">
+
+        <label>Status</label>
+        <select id="status">
+          <option value="Available">Available</option>
+          <option value="Sold">Sold</option>
+          <option value="Upcoming">Upcoming</option>
+        </select>
+
+        <label>Bedrooms</label><input type="number" id="rooms">
+        <label>Bathrooms</label><input type="number" id="bathrooms">
+        <label>Area (sqft)</label><input type="number" id="area">
+
+        <hr>
+        <h3 style="color: #f39c12; margin-bottom: 10px;">Internal Owner Details</h3>
+        <input type="text" id="owner_name" placeholder="Owner Name">
+        <input type="text" id="owner_contact" placeholder="Owner Contact">
+        <input type="number" id="owner_price" placeholder="Owner Price">
+        
+        <label>Description</label>
+        <textarea id="description" rows="4"></textarea>
+
+        <label>Property Images (Select Multiple)</label>
+        <input type="file" id="property_images" accept="image/*" multiple onchange="validateAndPreview(this)">
+        
+        <div id="preview_container"></div>
+
+        <button type="submit" id="submitBtn" class="admin-btn" style="margin-top: 20px;">Save Property</button>
+        <a href="properties.html" style="display:block; text-align:center; margin-top:10px; color:#666;">Cancel</a>
+      </form>
+    </section>
+  </div>
+</div>
+
+<script>
+let selectedFiles = [];
+// Function to show/hide "Other" input box
+function toggleOtherInput(selectElement) {
+    const otherInput = document.getElementById('other_type_input');
+    
+    if (selectElement.value === 'Other') {
+        otherInput.style.display = 'block';
+        otherInput.required = true; // User ko type karna padega
+    } else {
+        otherInput.style.display = 'none';
+        otherInput.required = false;
+        otherInput.value = ''; // Clear value if hidden
+    }
+}
+
+function validateAndPreview(input) {
+    const newFiles = Array.from(input.files);
+    if (selectedFiles.length + newFiles.length > 5) {
+        alert("Maximum 5 photos allowed!");
+        input.value = ""; 
+        return;
+    }
+    selectedFiles = [...selectedFiles, ...newFiles];
+    input.value = ""; 
+    renderPreviews();
+}
+
+function renderPreviews() {
+    const container = document.getElementById('preview_container');
+    container.innerHTML = ''; 
+    selectedFiles.forEach((file, index) => {
+        const reader = new FileReader();
+        reader.onload = e => {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'preview-wrapper';
+            // Font Awesome Icon used here inside the span
+            wrapper.innerHTML = `
+                <img src="${e.target.result}">
+                <span class="remove-btn" onclick="removePhoto(${index})">
+                    <i class="fas fa-times"></i>
+                </span>`;
+            container.appendChild(wrapper);
+        }
+        reader.readAsDataURL(file);
+    });
+}
+
+function removePhoto(index) {
+    selectedFiles.splice(index, 1);
+    renderPreviews();
+}
+
+document.getElementById('propertyForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (selectedFiles.length === 0) {
+        alert("Please select at least one photo!"); 
+        return;
+    }
+
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.innerText = "Saving...";
+
+    const formData = new FormData();
+    formData.append('title', document.getElementById('title').value);
+    formData.append('price', document.getElementById('price').value);
+    formData.append('location', document.getElementById('location').value);
+    // Handle Property Type Logic (For "Other" option)
+   const typeSelect = document.getElementById('property_type');
+   let finalPropertyType = typeSelect.value;
+
+   if (typeSelect.value === 'Other') {
+    // Agar 'Other' hai toh input box se value lo
+    finalPropertyType = document.getElementById('other_type_input').value;
+    }
+
+    formData.append('property_type', finalPropertyType);
+    formData.append('status', document.getElementById('status').value);
+    formData.append('rooms', document.getElementById('rooms').value);
+    formData.append('bathrooms', document.getElementById('bathrooms').value);
+    formData.append('area_sqft', document.getElementById('area').value);
+    formData.append('owner_name', document.getElementById('owner_name').value);
+    formData.append('owner_contact', document.getElementById('owner_contact').value);
+    formData.append('owner_price', document.getElementById('owner_price').value);
+    formData.append('description', document.getElementById('description').value);
+
+    selectedFiles.forEach(file => formData.append('images', file));
+
+    try {
+        const response = await fetch(API_BASE + '/api/properties/add', { 
+            method: 'POST', 
+            body: formData 
+        });
+        const result = await response.json();
+        if (result.success) { 
+            alert("✅ SUCCESS: Property Added!"); 
+            window.location.href = 'properties.html'; 
+        } else {
+            alert("❌ Error: " + result.error);
+            btn.disabled = false;
+            btn.innerText = "Save Property";
+        }
+    } catch (err) { 
+        alert("❌ Server connection failed!"); 
+        btn.disabled = false;
+    }
+});
+</script>
+<script src="../config.js"></script>
+</body>
+</html>

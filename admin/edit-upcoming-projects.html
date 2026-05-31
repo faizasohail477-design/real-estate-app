@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Upcoming Project | Admin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/admin.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .image-grid { display: flex; gap: 15px; flex-wrap: wrap; margin-top: 10px; padding: 10px; border: 1px solid #eee; border-radius: 8px; background: #fafafa; }
+        .preview-wrapper { position: relative; width: 120px; height: 120px; }
+        .preview-wrapper img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; border: 2px solid #ddd; }
+        .remove-btn {
+            position: absolute; top: -8px; right: -8px; background: #ff4d4d; color: white;
+            border-radius: 50%; width: 24px; height: 24px; text-align: center; line-height: 22px;
+            cursor: pointer; font-size: 14px; font-weight: bold; border: 2px solid white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center;
+        }
+    </style>
+</head>
+<body class="admin-body">
+<div class="admin-wrapper">
+    <aside class="admin-sidebar">
+        <div class="sidebar-header"><img src="../images/logo.png" alt="Logo" class="admin-logo"><h2>Shuqran Admin</h2></div>
+        <ul>
+            <li><a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+            <li><a href="properties.html"><i class="fas fa-building"></i> Properties</a></li>
+            <li><a href="add-property.html"><i class="fas fa-plus-square"></i> Add Property</a></li>
+            <li><a href="upcoming-projects.html" class="active"><i class="fas fa-project-diagram"></i> Upcoming Projects</a></li>
+            <li><a href="add-upcoming-projects.html"><i class="fas fa-plus-circle"></i> Add Upcoming Project</a></li>
+            <li><a href="construction-requests.html"><i class="fas fa-tools"></i> Construction Requests</a></li>
+            <li><a href="messages.html"><i class="fas fa-envelope"></i> Messages</a></li>
+           
+    </aside>
+
+    <div class="admin-main">
+        <header class="admin-topbar"><h1>Edit Project Details</h1></header>
+        <section class="admin-section">
+            <form class="admin-form" id="editProjectForm">
+                <label>Project Title</label><input type="text" id="proj_title" required>
+                <label>Location</label><input type="text" id="proj_loc" required>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div><label>Total Units</label><input type="number" id="proj_units"></div>
+                    <div>
+                        <label>Status</label>
+                        <select id="proj_status">
+                            <option value="Upcoming">Upcoming</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Pre-Booking">Pre-Booking</option>
+                        </select>
+                    </div>
+                </div>
+
+                <label>Description</label>
+                <textarea id="proj_desc" rows="4"></textarea>
+
+                <label style="font-weight:bold; margin-top:20px; display:block;">Current Photos (X to Delete)</label>
+                <div id="existing_preview" class="image-grid"></div>
+
+                <label style="font-weight:bold; margin-top:20px; display:block;">Add New Photos</label>
+                <input type="file" id="new_images" multiple accept="image/*" onchange="previewNew(this)">
+                <div id="new_preview" class="image-grid"></div>
+
+                <button type="submit" id="saveBtn" class="admin-btn" style="margin-top: 30px;">Update Project</button>
+                <a href="upcoming-projects.html" style="display:block; text-align:center; margin-top:15px; color:#666;">Cancel</a>
+            </form>
+        </section>
+    </div>
+</div>
+
+<script>
+const urlParams = new URLSearchParams(window.location.search);
+const projectId = urlParams.get('id');
+let deletedImages = [];
+let newFiles = [];
+
+async function loadProjectData() {
+    const res = await fetch(API_BASE + '/api/projects/all');
+    const all = await res.json();
+    const p = all.find(item => item.project_id == projectId);
+
+    if (p) {
+        document.getElementById('proj_title').value = p.title;
+        document.getElementById('proj_loc').value = p.location;
+        document.getElementById('proj_units').value = p.total_units || '';
+        document.getElementById('proj_status').value = p.status;
+        document.getElementById('proj_desc').value = p.description || '';
+
+        if (p.image_url) {
+            const imgs = p.image_url.split(',');
+            const container = document.getElementById('existing_preview');
+            imgs.forEach((img, idx) => {
+                const div = document.createElement('div');
+                div.className = 'preview-wrapper';
+                div.id = `old-img-${idx}`;
+                div.innerHTML = `<img src="${API_BASE}/uploads/${img.trim()}"><span class="remove-btn" onclick="markOldDelete('${img.trim()}', 'old-img-${idx}')">&times;</span>`;
+                container.appendChild(div);
+            });
+        }
+    }
+}
+
+function markOldDelete(imgName, divId) {
+    if(confirm("Bhai, yeh photo uda dein?")) {
+        deletedImages.push(imgName);
+        document.getElementById(divId).remove();
+    }
+}
+
+function previewNew(input) {
+    const files = Array.from(input.files);
+    newFiles = [...newFiles, ...files];
+    input.value = "";
+    renderNew();
+}
+
+function renderNew() {
+    const container = document.getElementById('new_preview');
+    container.innerHTML = '';
+    newFiles.forEach((file, index) => {
+        const reader = new FileReader();
+        reader.onload = e => {
+            const div = document.createElement('div');
+            div.className = 'preview-wrapper';
+            div.innerHTML = `<img src="${e.target.result}"><span class="remove-btn" onclick="removeNew(${index})">&times;</span>`;
+            container.appendChild(div);
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
+function removeNew(idx) {
+    newFiles.splice(idx, 1);
+    renderNew();
+}
+
+document.getElementById('editProjectForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('saveBtn');
+    btn.disabled = true; btn.innerText = "Updating...";
+
+    const formData = new FormData();
+    formData.append('title', document.getElementById('proj_title').value);
+    formData.append('location', document.getElementById('proj_loc').value);
+    formData.append('status', document.getElementById('proj_status').value);
+    formData.append('total_units', document.getElementById('proj_units').value);
+    formData.append('description', document.getElementById('proj_desc').value);
+    formData.append('deletedImages', JSON.stringify(deletedImages));
+    newFiles.forEach(f => formData.append('images', f));
+
+    try {
+        const res = await fetch(`${API_BASE}/api/projects/update/${projectId}`, {
+            method: 'PUT',
+            body: formData
+        });
+        const result = await res.json();
+        if(result.success) {
+            alert("✅ Updated!");
+            window.location.href = 'upcoming-projects.html';
+        }
+    } catch (e) { alert("❌ Error"); btn.disabled = false; }
+});
+
+window.onload = loadProjectData;
+</script>
+<script src="../config.js"></script>
+</body>
+</html>

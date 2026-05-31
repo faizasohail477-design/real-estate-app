@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Messages | Admin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/admin.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    .msg-cell { vertical-align: top; }
+    .msg-content { max-width: 400px; white-space: pre-wrap; }
+  </style>
+</head>
+<body class="admin-body">
+
+<div class="admin-wrapper">
+  <aside class="admin-sidebar">
+    <div class="sidebar-header">
+      <img src="../images/logo.png" alt="Logo" class="admin-logo">
+      <h2>Shuqran Admin</h2>
+    </div>
+    <ul>
+      <li><a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+      <li><a href="properties.html"><i class="fas fa-building"></i> Properties</a></li>
+      <li><a href="add-property.html"><i class="fas fa-plus-square"></i> Add Property</a></li>
+      <li><a href="upcoming-projects.html"><i class="fas fa-project-diagram"></i> Upcoming Projects</a></li>
+      <li><a href="add-upcoming-projects.html"><i class="fas fa-plus-circle"></i> Add Upcoming Project</a></li>
+      <li><a href="construction-requests.html"><i class="fas fa-tools"></i> Construction Requests</a></li>
+      <li><a href="messages.html" class="active"><i class="fas fa-envelope"></i> Messages</a></li>
+      <li><a href="change-credentials.html"><i class="fas fa-key"></i> Change Credentials</a></li>
+      <li><a href="#" onclick="performLogout()"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+    </ul>
+  </aside>
+
+  <div class="admin-main">
+    <header class="admin-topbar"><h1>Messages</h1></header>
+    <section class="admin-section" id="messageSection">
+      <p>Loading messages...</p>
+    </section>
+  </div>
+</div>
+
+<script src="../config.js"></script>
+<script>
+  async function fetchMessages() {
+    try {
+      const response = await fetch(API_BASE + '/api/inquiries/messages');
+      const data = await response.json();
+      const section = document.getElementById('messageSection');
+
+      if (data.length > 0) {
+        section.innerHTML = `
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Visitor Info</th>
+                <th>Message</th>
+                <th>Date</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${data.map(m => `
+                <tr>
+                  <td>
+                    <strong>${m.full_name || 'Unknown'}</strong><br>
+                    <small>${m.email || 'No Email'}</small>
+                  </td>
+                  <td class="msg-cell">
+                    <div class="msg-content">${m.message_text}</div>
+                  </td>
+                  <td>${new Date(m.submitted_at).toLocaleDateString()}</td>
+                  <td>
+                    <button onclick="deleteMsg(${m.message_id})" style="background:#ff4d4d; color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">
+                      <i class="fas fa-trash"></i> Delete
+                    </button>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>`;
+      } else {
+        section.innerHTML = '<p>No messages yet.</p>';
+      }
+    } catch (err) {
+      document.getElementById('messageSection').innerHTML = '<p style="color:red;">Error loading messages.</p>';
+    }
+  }
+
+  async function deleteMsg(id) {
+    if (confirm("Delete this message?")) {
+      await fetch(`${API_BASE}/api/inquiries/messages/${id}`, { method: 'DELETE' });
+      fetchMessages();
+    }
+  }
+
+  function performLogout() {
+    if (confirm("Logout karna chahte ho?")) {
+      localStorage.removeItem('adminToken');
+      localStorage.removeItem('adminUser');
+      window.location.href = 'admin-login.html';
+    }
+  }
+
+  window.onload = fetchMessages;
+</script>
+</body>
+</html>
