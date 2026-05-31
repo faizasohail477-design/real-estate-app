@@ -4,21 +4,25 @@
   <meta charset="UTF-8">
   <title>Admin Login | Shuqran</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <link rel="stylesheet" href="css/admin.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+  <script src="../config.js"></script>
 </head>
+
 <body class="admin-login-page">
 
 <div class="admin-login">
-  <img src="../images/logo.png" alt="Shuqran Logo" class="admin-login-logo">
+  <img src="../images/logo.png" class="admin-login-logo">
   <h2>Admin Login</h2>
 
   <form id="adminLoginForm">
     <input type="text" id="username" placeholder="Username" required>
 
-    <div style="position: relative; margin-bottom: 15px;">
-      <input type="password" id="password" placeholder="Password" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
-      <i class="fa-solid fa-eye" id="togglePassword" style="position: absolute; right: 12px; top: 35%; transform: translateY(-50%); cursor: pointer; color: #232222;"></i>
+    <div style="position:relative;">
+      <input type="password" id="password" placeholder="Password" required>
+      <i class="fa fa-eye" id="togglePassword"></i>
     </div>
 
     <button type="submit">Login</button>
@@ -27,8 +31,40 @@
   <p id="loginMessage"></p>
 </div>
 
-<!-- Config file PEHLE load hogi -->
-<script src="../config.js"></script>
-<script src="js/admin.js"></script>
+<script>
+document.getElementById("adminLoginForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const username = document.getElementById("username").value;
+  const password = document.getElementById("password").value;
+  const msg = document.getElementById("loginMessage");
+
+  msg.innerText = "Logging in...";
+
+  try {
+    const res = await fetch(API_BASE + "/api/admin/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password })
+    });
+
+    if (!res.ok) throw new Error("Server error");
+
+    const data = await res.json();
+
+    if (data.success) {
+      localStorage.setItem("adminToken", data.token);
+      localStorage.setItem("adminUser", data.user);
+      window.location.href = "dashboard.html";
+    } else {
+      msg.innerText = data.message;
+    }
+
+  } catch (err) {
+    msg.innerText = "Server error";
+  }
+});
+</script>
+
 </body>
 </html>

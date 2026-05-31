@@ -1,6 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script>
+(function () {
+  const token = localStorage.getItem("adminToken");
+
+  if (!token) {
+    window.location.href = "admin-login.html";
+  }
+})();
+</script>
   <meta charset="UTF-8">
   <title>Manage Properties | Admin</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
