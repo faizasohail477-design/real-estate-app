@@ -8,6 +8,6 @@
 // const API_BASE = 'http://localhost:5000';
 
 // DEPLOY ke baad - apna Render URL yahan paste karo:
-const API_BASE = 'https://shuqran-backend.onrender.com';
+const API_BASE = 'https://shuqran-real-estate-webapp.up.railway.app/';
 
 // Yeh variable saari HTML files use karti hain
