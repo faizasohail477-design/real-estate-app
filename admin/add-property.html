@@ -224,6 +224,12 @@ function removePhoto(index) {
     renderPreviews();
 }
 
+function logout() {
+  localStorage.removeItem("adminToken");
+  localStorage.removeItem("adminUser");
+  window.location.href = "admin-login.html";
+}
+
 document.getElementById('propertyForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     if (selectedFiles.length === 0) {
@@ -280,6 +286,7 @@ document.getElementById('propertyForm').addEventListener('submit', async (e) => 
     }
 });
 </script>
+
 <script src="../config.js"></script>
 </body>
 </html>

@@ -195,7 +195,7 @@ async function loadData() {
 }
 
 function markDelete(imgName, divId) {
-    if(confirm("Bhai, yeh pic delete karni hai?")) {
+    if(confirm("Are you sure, you want to delete this picture?")) {
         deletedImages.push(imgName);
         document.getElementById(divId).remove();
     }
@@ -228,6 +228,11 @@ function renderNewPreviews() {
 function removeNewPhoto(index) {
     newSelectedFiles.splice(index, 1);
     renderNewPreviews();
+}
+function logout() {
+  localStorage.removeItem("adminToken");
+  localStorage.removeItem("adminUser");
+  window.location.href = "admin-login.html";
 }
 
 document.getElementById('editForm').addEventListener('submit', async (e) => {

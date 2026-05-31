@@ -116,7 +116,7 @@ async function loadProjectData() {
 }
 
 function markOldDelete(imgName, divId) {
-    if(confirm("Bhai, yeh photo uda dein?")) {
+    if(confirm("Are you sure you want to delete this picture?")) {
         deletedImages.push(imgName);
         document.getElementById(divId).remove();
     }
@@ -147,6 +147,11 @@ function renderNew() {
 function removeNew(idx) {
     newFiles.splice(idx, 1);
     renderNew();
+}
+function logout() {
+  localStorage.removeItem("adminToken");
+  localStorage.removeItem("adminUser");
+  window.location.href = "admin-login.html";
 }
 
 document.getElementById('editProjectForm').addEventListener('submit', async (e) => {

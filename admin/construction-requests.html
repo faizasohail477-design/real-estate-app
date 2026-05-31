@@ -137,6 +137,11 @@
       localStorage.removeItem('adminUser');
       window.location.href = 'admin-login.html';
     }
+    function logout() {
+  localStorage.removeItem("adminToken");
+  localStorage.removeItem("adminUser");
+  window.location.href = "admin-login.html";
+}
   }
 
   window.onload = fetchConstruction;
